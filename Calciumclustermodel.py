@@ -3,7 +3,7 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Opgeslagen trainset
+# DBTITLE 1,Train set
 Imputed_train_set_spark = spark \
   .read \
   .option('inferschema', 'true') \
@@ -12,7 +12,7 @@ Imputed_train_set_spark = spark \
 
 # COMMAND ----------
 
-# DBTITLE 1,upsampelde gecombineerde val train set 
+# DBTITLE 1,upsampled combined val train set 
 Imputed_trainValidation_up_spark = spark\
   .read \
   .option('inferschema', 'true') \
@@ -21,7 +21,7 @@ Imputed_trainValidation_up_spark = spark\
 
 # COMMAND ----------
 
-# DBTITLE 1,upsampeld trainset
+# DBTITLE 1,upsampeld train set
 Imputed_train_set_up_spark = spark \
   .read \
   .option('inferschema', 'true') \
@@ -30,7 +30,7 @@ Imputed_train_set_up_spark = spark \
 
 # COMMAND ----------
 
-# DBTITLE 1,Opgeslagen validatieset
+# DBTITLE 1,Validation set
 Imputed_validation_set_spark = spark \
   .read \
   .option('inferschema', 'true') \
@@ -39,7 +39,7 @@ Imputed_validation_set_spark = spark \
 
 # COMMAND ----------
 
-# DBTITLE 1,Opgeslagen testset
+# DBTITLE 1,Test set
 Imputed_test_set_spark = spark \
   .read \
   .option('inferschema', 'true') \
@@ -449,11 +449,6 @@ y_valANDtrain2 = np.hstack((y_train2, y_val2))
 
 # COMMAND ----------
 
-Bootstrap_x_sensor_flat[1].shape
-
-
-# COMMAND ----------
-
 #XgBoost and Deep learning models have a form of randomness in their initialisation. The exact same model structure with the same training data may therefore give different results each time it is run. In order to be able to compare different models, model performance is not objective enough since it can differ with the same model and could be a high value simply because you were lucky. To compansate for this behaviour a second metric is proposed to compare models; the variance of the model. When a model has high variance, the chances are higher that a high value is obtained by luck and it could be that the second time the model is run, the exact same model results in dramaticly low performance metrics. To be able to measure varriance bootstraps are built, bootstraps are samples from the validation set with the same size as the validation set but acquired with sampling with replacement. Therefore the same model can be tested on multiple validation sets and the results can be compared and the SD calculated. 
 
 #define function for creating bootstraps
@@ -536,10 +531,11 @@ def evaluate_model(model, bootstrap_container_x_sensor, bootstrap_container_x_st
         bootstrap_y2 = bootstrap_container_y2[i]
         #reshape x from 3d to 2d for machine learning and from 4d to 3d for deep learning 
         bootstrap_x_sensor = bootstrap_x_sensor.reshape((bootstrap_x_sensor.shape[0], (bootstrap_x_sensor.shape[1]*bootstrap_x_sensor.shape[2]), bootstrap_x_sensor.shape[3]))
+        bootstrap_x_static = bootstrap_x_static.reshape(bootstrap_x_static.shape[0], (bootstrap_x_static.shape[1]*bootstrap_x_static.shape[2]))
         #for XgBoost convert to d-matrix, comment out when not using XgBoost!
 #         bootstrap_x_sensor =  xgb.DMatrix(bootstrap_x_sensor)
 		# get predictions #depending on model to evaluate, for some models static features need to be added 
-        preds = model.predict(bootstrap_x_sensor)
+        preds = model.predict([bootstrap_x_sensor, bootstrap_x_static])
         #convert to 0 or 1 value
         preds = np.where(np.squeeze(preds) < 0.5, 0, 1)
 		# get metric # first choose witch y set to test 1 = clustered, 2 = cut-off
@@ -580,18 +576,19 @@ Bootstrap_x_sensor_flat, Bootstrap_x_static, Bootstrap_y1, Bootstrap_y2  = creat
 # COMMAND ----------
 
 from sklearn.linear_model import LogisticRegression
-#misschien weights toevoegen en validatie wordt nu niet gebruikt
-class_weights = {0:1, 1:4}
+#add weights for class inbalance
+class_weights = {0:1, 1:3}
+#define model
 logisticmodel = LogisticRegression(random_state=0, solver = 'liblinear', max_iter = 400, class_weight = class_weights).fit(x_Train, y_train)
 
 # COMMAND ----------
 
-#evaluate model
+#Bootstrapping, evaluate model
 Bootstrap_performance = evaluate_model(logisticmodel, Bootstrap_x_sensor_flat, Bootstrap_x_static, Bootstrap_y1, Bootstrap_y2 )
 
 # COMMAND ----------
 
-#mean and variance performance
+#mean and variance performance bootstrapping
 Mean_performance = np.mean(Bootstrap_performance)
 SD_performance = np.std(Bootstrap_performance)
 # df = pd.DataFrame(Bootstrap_performance, columns = ['AUC'])
@@ -600,10 +597,12 @@ Mean_performance, SD_performance
 
 # COMMAND ----------
 
+#predict values test set
 pred = logisticmodel.predict(x_Test)
 
 # COMMAND ----------
 
+#visualize performance
 from sklearn.metrics import auc, roc_auc_score
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 cm = confusion_matrix(y_test, pred)
@@ -613,18 +612,15 @@ print(classification_report(y_test, pred))
 
 # COMMAND ----------
 
+#calculated performance metrics 
 from sklearn.metrics import average_precision_score, auc
 sensitiviteit = cm[1,1]/(cm[1,0]+cm[1,1])
 specificiteit = cm[0,0]/(cm[0,0]+cm[0,1])
 ppv = cm[1,1]/(cm[1,1]+cm[0,1])
-auc = roc_auc_score(y_test2, pred)
-MA = logisticmodel.score(x_Test, y_test2) #mean accuracy #het percentage wat het model goed geraden heeft 
-average_precision = average_precision_score(y_test2, pred)
+auc = roc_auc_score(y_test, pred)
+MA = logisticmodel.score(x_Test, y_test) #mean accuracy #het percentage wat het model goed geraden heeft 
+average_precision = average_precision_score(y_test, pred)
 print('sensitiviteit =', sensitiviteit, 'specificiteit =', specificiteit, 'ppv =', ppv, 'AUC =', auc, 'Mean accuracy =', MA, 'average_precision =', average_precision)
-
-# COMMAND ----------
-
-# MAGIC %load_ext tensorboard
 
 # COMMAND ----------
 
@@ -632,10 +628,16 @@ print('sensitiviteit =', sensitiviteit, 'specificiteit =', specificiteit, 'ppv =
 
 # COMMAND ----------
 
+#needed for ray tuner
+%load_ext tensorboard
+
+# COMMAND ----------
+
 import xgboost as xgb
 from ray import tune
 #code for hyperparameter tuning XgBoost model using the Ray Tuner 
-#while using databricks you need to manualy add ray to the cluster in the compute window, while adding select from pypi 
+#while using databricks you need to manualy add ray to the cluster in the compute window, while adding select from pypi
+#define model
 def tree(config):
     dtrain = xgb.DMatrix(x_Train, label=y_train)
     dtest = xgb.DMatrix(x_Test)
@@ -679,16 +681,20 @@ if __name__ == "__main__":
 
 # COMMAND ----------
 
+#model architecture XgBoost
 import xgboost as xgb
 # binary target
+#convert to special XgBoost matrix
 dtrain = xgb.DMatrix(x_Train, label=y_train2)
 dtest = xgb.DMatrix(x_Test)
-dval =  xgb.DMatrix(x_Val, label=y_val)
+dval =  xgb.DMatrix(x_Val, label=y_val2)
 # dvaltrain = xgb.DMatrix(x_ValANDTrain, label = y_valANDtrain2)
+#set parameters
 param = {'max_depth': 6, "min_child_weight": 1  , 'eta':0.00257046, 'gamma': 1, 'objective': 'binary:logistic'}
 param['scale_pos_weight'] = (len(y_train)-sum(y_train))/sum(y_train) #total number of positive samples devided by the total number of negative sampels, method to deal with class imbalance 
-param['eval_metric'] = 'auc' #misschien eerlijker als ik hier val loss van maak? 
+param['eval_metric'] = 'auc' 
 param['seed']=32
+#evaluation data for early stopping
 evallist = [(dtrain, 'train'), (dval, 'validation')]
 # evallist = [(dtest, 'test')] #earlystopping nu maar met de testset? 
 
@@ -696,11 +702,6 @@ evallist = [(dtrain, 'train'), (dval, 'validation')]
 
 num_round = 100 #define/use when not using early stopping. Early stopping is the better option most of the time since it prevents overfitting on the train set.  
 boost = xgb.train(param, dtrain, early_stopping_rounds = 200, evals = evallist)
-
-# COMMAND ----------
-
-num_round = 120 #voor als early stopping niet wordt toegepast  
-boost = xgb.train(param, dvaltrain, num_round, evals = evallist)
 
 # COMMAND ----------
 
@@ -721,7 +722,6 @@ Mean_performance, SD_performance
 # COMMAND ----------
 
 #predict y-values of the testset
-# ypred = boost.predict(dtest, iteration_range=(0, boost.best_iteration))
 ypred = boost.predict(dtest)
 
 # COMMAND ----------
@@ -732,10 +732,10 @@ pred_test_clases = np.where(np.squeeze(ypred) < 0.5, 0, 1)
 # COMMAND ----------
 
 #compare real y-values with predicted values using confusion matrix and classification report 
-cmboost = confusion_matrix(y_test, pred_test_clases)
+cmboost = confusion_matrix(y_test2, pred_test_clases)
 dispboost = ConfusionMatrixDisplay(confusion_matrix=cmboost)
 dispboost.plot()
-print(classification_report(y_test, pred_test_clases))
+print(classification_report(y_test2, pred_test_clases))
 
 # COMMAND ----------
 
@@ -743,8 +743,8 @@ print(classification_report(y_test, pred_test_clases))
 sensitiviteit = cmboost[1,1]/(cmboost[1,0]+cmboost[1,1])
 specificiteit = cmboost[0,0]/(cmboost[0,0]+cmboost[0,1])
 ppv = cmboost[1,1]/(cmboost[1,1]+cmboost[0,1])
-auc = roc_auc_score(y_test, pred_test_clases)
-average_precision = average_precision_score(y_test, pred_test_clases)
+auc = roc_auc_score(y_test2, pred_test_clases)
+average_precision = average_precision_score(y_test2, pred_test_clases)
 print('sensitiviteit =', sensitiviteit, 'specificiteit =', specificiteit, 'ppv =', ppv, 'AUC =', auc, 'average_precision = ', average_precision)
 
 # COMMAND ----------
@@ -837,6 +837,7 @@ tuner.search_space_summary()
 
 # COMMAND ----------
 
+#define earlystopping callback
 my_callbacks = tf.keras.callbacks.EarlyStopping(
     monitor='val_loss',
     patience=3,
@@ -856,20 +857,22 @@ tuner.results_summary()
 
 # COMMAND ----------
 
-#standaard model zonder code voor hyperparameter tuning met twee LSTM lagen en dropout 
+#basic sequential model 
+#define model
 model = Sequential()
-model.add(LSTM(30, activation = 'relu', input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=False)) #bij tuning is relu weggelaten, is niet perse nodig. eventueel proberen toe te voegen, kijken wat het doet. 
-model.add(Dropout(0.4))#hoeveel info moet worden vergeten uit de vorige cel
-model.add(Dense(1, activation = "sigmoid")) #Hoeveel waardes je wil voorspellen, sigmoid zorgt voor een getal tussen o en 1  
-
-model.compile(optimizer = 'Adam', loss='binary_crossentropy', metrics = ['AUC', 'Precision', 'Recall']) #Mean square error alleen gebruiken voor continu, sensitiviteit en specifiteit ook toepassen evt. in metrics  
+model.add(LSTM(30, activation = 'relu', input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=False)) #left relu activation out since tanh en sigmoid already cause non linearity
+model.add(Dropout(0.4)) 
+model.add(Dense(1, activation = "sigmoid")) #Sigmoid activation causes binary result 
+#compile model
+model.compile(optimizer = 'Adam', loss='binary_crossentropy', metrics = ['AUC', 'Precision', 'Recall']) 
 model.summary()
 
 # COMMAND ----------
 
-# fit the model, dit is al niet meer het basis model want hier zijn classweights toegepast tegen classinbalincing
-history = model.fit(x_train_up, y_train2_up, epochs=100, batch_size = 42, validation_data=(x_val, y_val2), class_weight = {0:1, 1:1}, callbacks = [my_callbacks]) 
+# fit model, added earlystopping and class weights
+history = model.fit(x_train_up, y_train2_up, epochs=100, batch_size = 22, validation_data=(x_val, y_val2), class_weight = {0:1, 1:1}, callbacks = [my_callbacks]) 
 
+#plot loss and val_loss for every epoch 
 plt.plot(history.history['loss'], label='Training loss')
 plt.plot(history.history['val_loss'], label='Validation loss')
 plt.legend()
@@ -878,10 +881,9 @@ plt.legend()
 # COMMAND ----------
 
 #Bootstrapping 
-#create 50 bootstraps for deep learning
+#create 50 bootstraps for deep learning 
 Bootstrap_x_sensor, Bootstrap_x_static, Bootstrap_y1, Bootstrap_y2  = create_bootstraps(x_val, x_Static_val, y_val, y_val2, 50) 
 Bootstrap_performance = evaluate_model(model, Bootstrap_x_sensor, Bootstrap_x_static, Bootstrap_y1, Bootstrap_y2)
-Bootstrap_performance
 
 # COMMAND ----------
 
@@ -890,16 +892,17 @@ Mean_performance = np.mean(Bootstrap_performance)
 SD_performance = np.std(Bootstrap_performance)
 df = pd.DataFrame(Bootstrap_performance, columns = ['AUC'])
 display(df)
-Mean_performance, SD_performance
+Mean_performance, SD_performance, my_callbacks.stopped_epoch
 
 # COMMAND ----------
 
-my_callbacks.stopped_epoch
-# pred = model.predict(x_test)
-# pred_clases = np.where(np.squeeze(pred) < 0.5, 0, 1) 
+#predict values test set (I eventually did not use this since the functional model performed better on the validation set )
+pred = model.predict(x_test)
+pred_clases = np.where(np.squeeze(pred) < 0.5, 0, 1) 
 
 # COMMAND ----------
 
+#visualize model performance
 CM = confusion_matrix(y_test2, pred_clases)
 disp = ConfusionMatrixDisplay(confusion_matrix=CM)
 disp.plot()
@@ -907,6 +910,7 @@ print(classification_report(y_test2, pred_clases))
 
 # COMMAND ----------
 
+#evaluation metrics
 sensitiviteit = CM[1,1]/(CM[1,0]+CM[1,1])
 specificiteit = CM[0,0]/(CM[0,0]+CM[0,1])
 ppv = CM[1,1]/(CM[1,1]+CM[0,1])
@@ -916,6 +920,7 @@ print('sensitiviteit =', sensitiviteit, 'specificiteit =', specificiteit, 'ppv =
 
 # COMMAND ----------
 
+#precission recall plot
 from sklearn.metrics import precision_recall_curve, average_precision_score, auc, plot_precision_recall_curve
 from matplotlib import pyplot as plt
 #calculate precision and recall
@@ -935,11 +940,11 @@ plt.show()
 
 # COMMAND ----------
 
-# MAGIC %md ### Hyperparameter tuning nieuwe stijl
+# MAGIC %md ### Hyperparameter tuning sequential model
 
 # COMMAND ----------
 
-#definitie verschillende class weights 
+#define class weight options
 cw1 = {0:1, 1:1}  
 cw2 = {0:1, 1:2}
 cw3 = {0:1, 1:3}
@@ -956,11 +961,14 @@ p_cw = [cw1, cw2, cw3, cw4]
 
 # COMMAND ----------
 
-#sequential model kan enkel dealen met een soort input, om andere inputs te kunnen toevoegen moet daarom gebruik worden gemaakt van een functional model. 
+
+# A functional model was used for hyperparameter tuning, works at the same way as a sequential model but is compatinble with multi-input and therefore needed when adding static features.  
 import random
-#define inputs
+#define inputs, in this case single input model
 sensor_input = keras.Input(shape=(22,19))
+#create empty list
 Results = []
+#run multiple models but with a different random configuration of parameters each time
 for i in range(2):
     units = random.choice(p_units)
     BN = random.choice(p_BN)
@@ -976,21 +984,24 @@ for i in range(2):
     else: 
         BN_output = LSTM_output
 
-#dropout laag
+#dropout layer
     Dropout_output = Dropout(dropout)(BN_output)
 
-#definitie predictie 
+#define final layer
     prediction =Dense(1, activation = 'sigmoid')(Dropout_output)
 
-#definitie model
+#define model
     Model = keras.Model(
     inputs = sensor_input,
     outputs =prediction)
-
-    Model.compile(optimizer = 'Adam', loss='binary_crossentropy',  metrics = ['AUC', 'Precision', 'Recall']) #hier kan je eventueel nog loss weights toepassen 
+#compile model
+    Model.compile(optimizer = 'Adam', loss='binary_crossentropy',  metrics = ['AUC', 'Precision', 'Recall']) 
+#fit model
     Model.fit(x_train_up, y_train2_up, batch_size = BS, epochs=100, class_weight = Class_weights, validation_data=(x_val, y_val2), callbacks = [my_callbacks],  use_multiprocessing = True )
+#predict values validation set 
     pred = Model.predict(x_val)
     pred_clases = np.where(np.squeeze(pred) < 0.5, 0, 1) 
+#add predictions to list and the associated hyperparameters    
     Results.append({
         'f1_score': f1_score(y_val2, pred_clases),
         'AUC': roc_auc_score(y_val2, pred_clases), 
@@ -999,10 +1010,11 @@ for i in range(2):
         'p_dropout': dropout,
         'p_BN' : BN,
         'p_BS' : BS,
-        'p_cw' : Class_weights, 
-        'epoch' : my_callbacks.stopped_epoch
+        'p_cw' : Class_weights
         })
+#convert to DF
 Results = pd.DataFrame(Results)
+#sort modelresults
 Results = Results.sort_values(by='AUC', ascending=False)
 display(Results)
 
@@ -1012,56 +1024,65 @@ display(Results)
 
 # COMMAND ----------
 
-#sequential model kan enkel dealen met een soort input, om andere inputs te kunnen toevoegen moet daarom gebruik worden gemaakt van een functional model. 
+#Multi-input functional model with both sequential as static input
 from keras.layers import Dense, LSTM, Dropout, BatchNormalization
 #define inputs
 sensor_input = keras.Input(shape=(22,19))
 static_input = keras.Input(shape=(10))
 
 #define LSTM 
-LSTM_output = LSTM(40)(sensor_input)
-#toevoegen batch normalisation 
+LSTM_output = LSTM(30)(sensor_input)
+#add batch normalisation 
 BN_output = BatchNormalization()(LSTM_output)
-#combineren met static features
+#combine with static features
 all_features = concatenate([BN_output, static_input])
 
-#definitie van MLP 
-MLP_output = Dense(40, activation = 'relu')(all_features)
+#define MLP-layer  
+MLP_output = Dense(80, activation = 'relu')(all_features)
 
-#dropout laag
-Dropout_output = Dropout(rate = 0.3)(MLP_output)
+#add dropout 
+Dropout_output = Dropout(rate = 0.0)(MLP_output)
 
-#definitie predictie 
+#define final layer 
 prediction = Dense(1, activation = 'sigmoid')(Dropout_output)
 
-#definitie model
+#define model
 Model = keras.Model(
     inputs = [sensor_input, static_input],
-    outputs =prediction)
-
-Model.compile(optimizer = 'Adam', loss='binary_crossentropy',  metrics = ['AUC', 'Precision', 'Recall']) #hier kan je eventueel nog loss weights toepassen 
+    outputs = prediction)
+#compile model
+Model.compile(optimizer = 'Adam', loss='binary_crossentropy',  metrics = ['AUC', 'Precision', 'Recall'])
 Model.summary()
 
 # COMMAND ----------
 
-# class_weights = {0:1, 1:1.5} #tegen classinbalance 
-history = Model.fit([x_trainANDval_up, x_Static_TV_up], y_trainANDval_up, batch_size = 42, epochs=25, class_weight = {0:1, 1:2}, use_multiprocessing = True )
+#fit model, add class_weights and earlystopping as callback (my_callbacks has been previously defined)
+history = Model.fit([x_train_up, x_Static_up], y_train2_up, batch_size = 22, epochs=100, class_weight = {0:1, 1:3}, validation_data=([x_val, x_Static_val], y_val2), callbacks = [my_callbacks], use_multiprocessing = True )
+#plot loss and val_loss curve to keep track of model functioning
 plt.plot(history.history['loss'], label='Training loss')
-# plt.plot(history.history['val_loss'], label='Validation loss')
+plt.plot(history.history['val_loss'], label='Validation loss')
 plt.legend()
 
 # COMMAND ----------
 
-my_callbacks = [
-    tf.keras.callbacks.EarlyStopping(
-        monitor='val_loss',
-        patience=3,
-        restore_best_weights = True,
-    )
-]
+#Bootstrapping 
+#create 50 bootstraps for deep learning
+Bootstrap_x_sensor, Bootstrap_x_static, Bootstrap_y1, Bootstrap_y2  = create_bootstraps(x_val, x_Static_val, y_val, y_val2, 50) 
+Bootstrap_performance = evaluate_model(Model, Bootstrap_x_sensor, Bootstrap_x_static, Bootstrap_y1, Bootstrap_y2)
+Bootstrap_performance
 
 # COMMAND ----------
 
+#results bootstrapping, mean auc and std 
+Mean_performance = np.mean(Bootstrap_performance)
+SD_performance = np.std(Bootstrap_performance)
+df = pd.DataFrame(Bootstrap_performance, columns = ['AUC'])
+display(df)
+Mean_performance, SD_performance, my_callbacks.stopped_epoch
+
+# COMMAND ----------
+
+#testing final model on the test set 
 pred = Model.predict([x_test, x_Static_test])
 pred_clases = np.where(np.squeeze(pred) < 0.5, 0, 1) 
 CM = confusion_matrix(y_test2, pred_clases)
@@ -1071,10 +1092,11 @@ print(classification_report(y_test2, pred_clases))
 
 # COMMAND ----------
 
+#evaluation metrics 
 sensitiviteit = CM[1,1]/(CM[1,0]+CM[1,1])
 specificiteit = CM[0,0]/(CM[0,0]+CM[0,1])
 ppv = CM[1,1]/(CM[1,1]+CM[0,1])
-auc = roc_auc_score(y_test2, pred_clases)
+auc = roc_auc_score(y_test2, pred_clases) 
 
 average_precision = average_precision_score(y_test2, pred_clases)
 print('sensitiviteit =', sensitiviteit, 'specificiteit =', specificiteit, 'ppv =', ppv, 'AUC =', auc, 'average_precision = ', average_precision)
@@ -1085,75 +1107,77 @@ print('sensitiviteit =', sensitiviteit, 'specificiteit =', specificiteit, 'ppv =
 
 # COMMAND ----------
 
-cw1 = {0:1, 1:1} #tegen classinbalance 
+#define possible class-weights
+cw1 = {0:1, 1:1} 
 cw2 = {0:1, 1:2}
 cw3 = {0:1, 1:3}
 
 # COMMAND ----------
 
-#definiëren hyperparameters
-# p_dropout = [0, 0.1, 0.2, 0.3, 0.4]
-# p_units = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-# p_units2 = [10, 20, 30, 40, 50, 60, 70, 80]
-# p_BN = [0,1]
-# p_BS = [12, 22, 32, 42]
-# p_cw = [cw1, cw2, cw3]
-p_dropout = [0.1]
-p_units = [70]
-p_units2 = [30]
-p_BN = [1]
+#define possible hyperparameters
+p_dropout = [0, 0.1, 0.2, 0.3, 0.4]
+p_units = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+p_units2 = [10, 20, 30, 40, 50, 60, 70, 80]
+p_BN = [0,1]
 p_BS = [12, 22, 32, 42]
-p_cw = [cw2]
+p_cw = [cw1, cw2, cw3]
 
 # COMMAND ----------
 
-#sequential model kan enkel dealen met een soort input, om andere inputs te kunnen toevoegen moet daarom gebruik worden gemaakt van een functional model. 
+#hyperparameter tuning using random search for multi-input functional model
 from keras.layers import Dense, LSTM, Dropout, BatchNormalization
 import random
 #define inputs
 sensor_input = keras.Input(shape=(22,19))
 static_input = keras.Input(shape=(10))
+#create empty list for modelresults
 results = []
+#define number of possible combination to try
 for i in range(100):
+    #choose random parameters
     units = random.choice(p_units)
     unitsMLP = random.choice(p_units2)
     BN = random.choice(p_BN)
     dropout = random.choice(p_dropout)
     BS = random.choice(p_BS)
     Class_weights = random.choice(p_cw)
-#define LSTM:
+
+    #define LSTM:
 
     LSTM_output = LSTM(units)(sensor_input)
-
+    #add batchnormalisation depending on hyperparameter choice
     if BN == 1:
         BN_output = BatchNormalization()(LSTM_output)
     else: 
         BN_output = LSTM_output
-#combineren met static features
+    #combine with static features
     all_features = concatenate([BN_output, static_input])
 
-#definitie van MLP 
+    #define MLP layer 
     MLP_output = Dense(unitsMLP, activation = 'relu')(all_features)
 
-#dropout laag
+    #add dropout
     Dropout_output = Dropout(dropout)(MLP_output)
 
-#definitie predictie 
+    #define final layer
     prediction =Dense(1, activation = 'sigmoid')(Dropout_output)
 
-#definitie model
+    #define model
     Model = keras.Model(
     inputs = [sensor_input, static_input],
     outputs =prediction)
-
-    Model.compile(optimizer = 'Adam', loss='binary_crossentropy',  metrics = ['AUC', 'Precision', 'Recall']) #hier kan je eventueel nog loss weights toepassen 
+    #compile model
+    Model.compile(optimizer = 'Adam', loss='binary_crossentropy',  metrics = ['AUC', 'Precision', 'Recall'])
+    #fit model, add earlystopping and validation data 
     Model.fit([x_train_up, x_Static_up], y_train2_up, batch_size = BS, epochs=100, class_weight = Class_weights, validation_data=([x_val,x_Static_val], y_val2), callbacks = [my_callbacks],  use_multiprocessing = True )
-    pred = Model.predict([x_test, x_Static_test])
+    #predict y-values validation set
+    pred = Model.predict([x_val,x_Static_val])
     pred_clases = np.where(np.squeeze(pred) < 0.5, 0, 1) 
+    #append model results to list and the hyperparameters used to make the model 
     results.append({
-        'f1_score': f1_score(y_test2, pred_clases),
-        'AUC': roc_auc_score(y_test2, pred_clases), 
-        'Average Precision': average_precision_score(y_test2, pred_clases), 
+        'f1_score': f1_score(y_val2, pred_clases),
+        'AUC': roc_auc_score(y_val2, pred_clases), 
+        'Average Precision': average_precision_score(y_val2, pred_clases), 
         'p_units': units,
         'p_units2': unitsMLP,
         'p_dropout': dropout,
@@ -1161,6 +1185,8 @@ for i in range(100):
         'p_BS' : BS,
         'p_cw' : Class_weights               
         })
+#convert list to dataframe
 results = pd.DataFrame(results)
+#sort by AUC
 results = results.sort_values(by='AUC', ascending=False)
 display(results)
