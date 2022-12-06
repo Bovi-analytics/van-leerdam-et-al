@@ -67,7 +67,7 @@
 
 ###  http://purl.org/sensor_cattle#CalciumDaysInMilk
 :DayOfCalciumMeasurement rdf:type owl:DatatypeProperty ;
-                   rdfs:domain :BloodCalcium .
+                   rdfs:domain :BloodCalcium ;
                    rdfs:range xsd:dateTime ;
                    rdfs:label "DayOfCalciumMeasurement"@en .
 
