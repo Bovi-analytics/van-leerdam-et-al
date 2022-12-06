@@ -13,18 +13,6 @@
 #    Object Properties
 #################################################################
 
-###  http://purl.org/sensor_cattle#hasDayBeforeCalving
-:hasDayBeforeCalving rdf:type owl:ObjectProperty ;
-                     rdfs:subPropertyOf owl:topObjectProperty ;
-                     rdfs:domain :Measurement ;
-                     rdfs:label "hasDayBeforeCalving"@en .
-
-
-###  http://purl.org/sensor_cattle#hasDayOfMeasurement
-:hasDayOfMeasurement rdf:type owl:ObjectProperty ;
-                     rdfs:subPropertyOf owl:topObjectProperty .
-
-
 ###  http://purl.org/sensor_cattle#hasMeasurement
 :hasMeasurement rdf:type owl:ObjectProperty ;
                 rdfs:subPropertyOf owl:topObjectProperty ;
@@ -78,8 +66,10 @@
 
 
 ###  http://purl.org/sensor_cattle#CalciumDaysInMilk
-:CalciumDaysInMilk rdf:type owl:DatatypeProperty ;
+:DayOfCalciumMeasurement rdf:type owl:DatatypeProperty ;
                    rdfs:domain :BloodCalcium .
+                   rdfs:range xsd:dateTime
+                   rdfs:label "DayOfCalciumMeasurement"@en .
 
 
 ###  http://purl.org/sensor_cattle#CalciumValue
@@ -112,20 +102,6 @@
         rdfs:range xsd:boolean ;
         rdfs:label "CutOff"@en .
 
-
-###  http://purl.org/sensor_cattle#DayBeforeCalving
-:DayBeforeCalving rdf:type owl:DatatypeProperty ;
-                  rdfs:subPropertyOf owl:topDataProperty ;
-                  rdfs:range xsd:integer ;
-                  rdfs:label "DayBeforeCalving"@en .
-
-
-###  http://purl.org/sensor_cattle#DayofMeasurementRelativeToCalving
-:DayofMeasurementRelativeToCalving rdf:type owl:DatatypeProperty ;
-                                   rdfs:subPropertyOf owl:topDataProperty ;
-                                   rdfs:domain :BloodCalcium ;
-                                   rdfs:range xsd:integer ;
-                                   rdfs:label "DayofMeasurementRelativeToCalving"@en .
 
 
 ###  http://purl.org/sensor_cattle#HerdIdentifier
@@ -161,11 +137,11 @@
 
 
 ###  http://purl.org/sensor_cattle#PaperRecordedCalvingDate
-:PaperRecordedCalvingDate rdf:type owl:DatatypeProperty ;
+:CalvingDate rdf:type owl:DatatypeProperty ;
                           rdfs:subPropertyOf owl:topDataProperty ;
                           rdfs:domain :DairyCow ;
                           rdfs:range xsd:dateTime ;
-                          rdfs:label "PaperRecordedCalvingDate"@en .
+                          rdfs:label "CalvingDate"@en .
 
 
 ###  http://purl.org/sensor_cattle#Parity
@@ -193,11 +169,11 @@
 
 
 ###  http://purl.org/sensor_cattle#TransitionDayInMilk
-:TransitionDayInMilk rdf:type owl:DatatypeProperty ;
+:DayOfMeasurement rdf:type owl:DatatypeProperty ;
                      rdfs:subPropertyOf owl:topDataProperty ;
                      rdfs:domain :Measurement ;
-                     rdfs:range xsd:integer ;
-                     rdfs:label "TransitionDayInMilk"@en .
+                     rdfs:range xsd:dateTime ;
+                     rdfs:label "DayOfMeasurement"@en .
 
 
 #################################################################
