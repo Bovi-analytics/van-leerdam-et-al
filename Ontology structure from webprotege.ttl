@@ -1,0 +1,268 @@
+@prefix : <urn:webprotege:ontology:350a5998-607f-4f35-a264-5d609eb4f24a#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <urn:webprotege:ontology:350a5998-607f-4f35-a264-5d609eb4f24a> .
+
+<urn:webprotege:ontology:350a5998-607f-4f35-a264-5d609eb4f24a> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://webprotege.stanford.edu/R7RMwsquch4t8G29nzxx2Bg
+<http://webprotege.stanford.edu/R7RMwsquch4t8G29nzxx2Bg> rdf:type owl:ObjectProperty ;
+                                                         rdfs:subPropertyOf owl:topObjectProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH> ;
+                                                         rdfs:range <http://webprotege.stanford.edu/RCO28OwpAnvd2zh4dPI92p6> ;
+                                                         rdfs:label "livesIn"@en .
+
+
+###  http://webprotege.stanford.edu/RDwuUdhLGgzqtTlsy7crSyB
+<http://webprotege.stanford.edu/RDwuUdhLGgzqtTlsy7crSyB> rdf:type owl:ObjectProperty ;
+                                                         rdfs:subPropertyOf owl:topObjectProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:range <http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> ;
+                                                         rdfs:label "measuredBy"@en .
+
+
+###  http://webprotege.stanford.edu/RM9vxF2G3bRpPgIRcKE74l
+<http://webprotege.stanford.edu/RM9vxF2G3bRpPgIRcKE74l> rdf:type owl:ObjectProperty ;
+                                                        rdfs:subPropertyOf owl:topObjectProperty ;
+                                                        rdfs:domain <http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH> ;
+                                                        rdfs:range <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                        rdfs:label "hasMeasurement"@en .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://webprotege.stanford.edu/R7K8OzVsz6uR3WLd1hgVuy
+<http://webprotege.stanford.edu/R7K8OzVsz6uR3WLd1hgVuy> rdf:type owl:DatatypeProperty ;
+                                                        rdfs:subPropertyOf owl:topDataProperty ;
+                                                        rdfs:domain <http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH> ;
+                                                        rdfs:range xsd:string ;
+                                                        rdfs:label "Parity"@en .
+
+
+###  http://webprotege.stanford.edu/R7PDc5xtXx7VizEh4KMUOvK
+<http://webprotege.stanford.edu/R7PDc5xtXx7VizEh4KMUOvK> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH> ;
+                                                         rdfs:range xsd:string ;
+                                                         rdfs:label "CalvingSeason"@en .
+
+
+###  http://webprotege.stanford.edu/R7mLltVv7N4sXhiC3Wl6UuO
+<http://webprotege.stanford.edu/R7mLltVv7N4sXhiC3Wl6UuO> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:range xsd:integer ;
+                                                         rdfs:label "NumberOfBouts"@en .
+
+
+###  http://webprotege.stanford.edu/R7uGmb9PB72DZKIKqbAzxSR
+<http://webprotege.stanford.edu/R7uGmb9PB72DZKIKqbAzxSR> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:range xsd:integer ;
+                                                         rdfs:label "MinutesPerDay"@en .
+
+
+###  http://webprotege.stanford.edu/R82BTlUQUZoQPudxJkxSDZw
+<http://webprotege.stanford.edu/R82BTlUQUZoQPudxJkxSDZw> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:range xsd:integer ;
+                                                         rdfs:label "AverageMinutesBetweenBouts"@en .
+
+
+###  http://webprotege.stanford.edu/R83eSvrJd1jEDfR2JdFJSEN
+<http://webprotege.stanford.edu/R83eSvrJd1jEDfR2JdFJSEN> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RDXpk5j27TocQJNCOLbrYo2> ;
+                                                         rdfs:range xsd:boolean ;
+                                                         rdfs:label "Cluster"@en .
+
+
+###  http://webprotege.stanford.edu/R8qpQizTpKt7eCWyIJKvN82
+<http://webprotege.stanford.edu/R8qpQizTpKt7eCWyIJKvN82> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RDXpk5j27TocQJNCOLbrYo2> ;
+                                                         rdfs:range owl:real ;
+                                                         rdfs:label "CalciumValue"@en .
+
+
+###  http://webprotege.stanford.edu/R9mEWRWQEWJMEpVNVQPHkjp
+<http://webprotege.stanford.edu/R9mEWRWQEWJMEpVNVQPHkjp> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:range xsd:integer ;
+                                                         rdfs:label "NumberOfSteps"@en .
+
+
+###  http://webprotege.stanford.edu/RBUFKeTmIy8CXmsQDc0taqg
+<http://webprotege.stanford.edu/RBUFKeTmIy8CXmsQDc0taqg> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RDXpk5j27TocQJNCOLbrYo2> ;
+                                                         rdfs:range xsd:integer ;
+                                                         rdfs:label "DayOfCalciumMeasurement"@en .
+
+
+###  http://webprotege.stanford.edu/RCCYL8QwwJGmjiYXLFyY6jX
+<http://webprotege.stanford.edu/RCCYL8QwwJGmjiYXLFyY6jX> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH> ;
+                                                         rdfs:range xsd:dateTime ;
+                                                         rdfs:label "CalvingDate"@en .
+
+
+###  http://webprotege.stanford.edu/RCHNoG8vDBXpabK9vTNm7Jc
+<http://webprotege.stanford.edu/RCHNoG8vDBXpabK9vTNm7Jc> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:range xsd:integer ;
+                                                         rdfs:label "AverageMinutesPerBout"@en .
+
+
+###  http://webprotege.stanford.edu/RCPgt4SngCpavfr70c0m5wy
+<http://webprotege.stanford.edu/RCPgt4SngCpavfr70c0m5wy> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH> ;
+                                                         rdfs:range xsd:string ;
+                                                         rdfs:label "AnimalEartag"@en .
+
+
+###  http://webprotege.stanford.edu/RCZexHccC87AFbtiCYtMRPV
+<http://webprotege.stanford.edu/RCZexHccC87AFbtiCYtMRPV> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RBFi5kadSH7CRNrG6u0IYIy> ;
+                                                         rdfs:range owl:real ;
+                                                         rdfs:label "ScoreBCS"@en .
+
+
+###  http://webprotege.stanford.edu/RCvX8Thjp7PlSnivRAIUqo
+<http://webprotege.stanford.edu/RCvX8Thjp7PlSnivRAIUqo> rdf:type owl:DatatypeProperty ;
+                                                        rdfs:subPropertyOf owl:topDataProperty ;
+                                                        rdfs:domain <http://webprotege.stanford.edu/RDXpk5j27TocQJNCOLbrYo2> ;
+                                                        rdfs:range xsd:boolean ;
+                                                        rdfs:label "CutOff"@en .
+
+
+###  http://webprotege.stanford.edu/RDSL7Y15FPzQBk1WUIs3rew
+<http://webprotege.stanford.edu/RDSL7Y15FPzQBk1WUIs3rew> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/R7KUa1zQRlZnJniAa934WCd> ;
+                                                         rdfs:range owl:real ;
+                                                         rdfs:label "ScoreLocomotion"@en .
+
+
+###  http://webprotege.stanford.edu/RDh317F4oQimyT5TWLFf0F4
+<http://webprotege.stanford.edu/RDh317F4oQimyT5TWLFf0F4> rdf:type owl:DatatypeProperty ;
+                                                         rdfs:subPropertyOf owl:topDataProperty ;
+                                                         rdfs:domain <http://webprotege.stanford.edu/RCO28OwpAnvd2zh4dPI92p6> ;
+                                                         rdfs:range xsd:string ;
+                                                         rdfs:label "HerdIdentifier"@en .
+
+
+###  http://webprotege.stanford.edu/RmP4mbczrubcZMPUm1Z7ao
+<http://webprotege.stanford.edu/RmP4mbczrubcZMPUm1Z7ao> rdf:type owl:DatatypeProperty ;
+                                                        rdfs:subPropertyOf owl:topDataProperty ;
+                                                        rdfs:domain <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                        rdfs:range xsd:integer ;
+                                                        rdfs:label "DayOfMeasurement"@en .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://webprotege.stanford.edu/R7KUa1zQRlZnJniAa934WCd
+<http://webprotege.stanford.edu/R7KUa1zQRlZnJniAa934WCd> rdf:type owl:Class ;
+                                                         rdfs:subClassOf <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:label "Locomotion score"@en .
+
+
+###  http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P
+<http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> rdf:type owl:Class ;
+                                                         rdfs:subClassOf owl:Thing ;
+                                                         rdfs:label "Sensor"@en .
+
+
+###  http://webprotege.stanford.edu/RBFi5kadSH7CRNrG6u0IYIy
+<http://webprotege.stanford.edu/RBFi5kadSH7CRNrG6u0IYIy> rdf:type owl:Class ;
+                                                         rdfs:subClassOf <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:label "Body condition score"@en .
+
+
+###  http://webprotege.stanford.edu/RCO28OwpAnvd2zh4dPI92p6
+<http://webprotege.stanford.edu/RCO28OwpAnvd2zh4dPI92p6> rdf:type owl:Class ;
+                                                         rdfs:label "Herd"@en .
+
+
+###  http://webprotege.stanford.edu/RDXpk5j27TocQJNCOLbrYo2
+<http://webprotege.stanford.edu/RDXpk5j27TocQJNCOLbrYo2> rdf:type owl:Class ;
+                                                         rdfs:subClassOf <http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> ;
+                                                         rdfs:label "Blood calcium"@en .
+
+
+###  http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH
+<http://webprotege.stanford.edu/RDYNSj84lhitYejbDK4ntbH> rdf:type owl:Class ;
+                                                         rdfs:label "Dairy cow"@en .
+
+
+###  http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD
+<http://webprotege.stanford.edu/RrWYlYRZNbdqg1rcXNclGD> rdf:type owl:Class ;
+                                                        rdfs:label "Measurement"@en .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://webprotege.stanford.edu/R75kk4sRB92dUuob4Dyvl5W
+<http://webprotege.stanford.edu/R75kk4sRB92dUuob4Dyvl5W> rdf:type owl:NamedIndividual ,
+                                                                  <http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> ;
+                                                         rdfs:label "Eating"@en .
+
+
+###  http://webprotege.stanford.edu/R7dxH84BFeosU9AEZx04eCB
+<http://webprotege.stanford.edu/R7dxH84BFeosU9AEZx04eCB> rdf:type owl:NamedIndividual ,
+                                                                  <http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> ;
+                                                         rdfs:label "Standing"@en .
+
+
+###  http://webprotege.stanford.edu/R8c4PiLwavNhsOhcn5QwkXA
+<http://webprotege.stanford.edu/R8c4PiLwavNhsOhcn5QwkXA> rdf:type owl:NamedIndividual ,
+                                                                  <http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> ;
+                                                         rdfs:label "Walking"@en .
+
+
+###  http://webprotege.stanford.edu/R9I1gAneRncET5luBXPFk3A
+<http://webprotege.stanford.edu/R9I1gAneRncET5luBXPFk3A> rdf:type owl:NamedIndividual ,
+                                                                  <http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> ;
+                                                         rdfs:label "Lying"@en .
+
+
+###  http://webprotege.stanford.edu/RCILS6rZ5Dirw48UgoDKDgB
+<http://webprotege.stanford.edu/RCILS6rZ5Dirw48UgoDKDgB> rdf:type owl:NamedIndividual ,
+                                                                  <http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> ;
+                                                         rdfs:label "Inactivity"@en .
+
+
+###  http://webprotege.stanford.edu/RDSfdFsp0pmjaNXUZNMWLv5
+<http://webprotege.stanford.edu/RDSfdFsp0pmjaNXUZNMWLv5> rdf:type owl:NamedIndividual ,
+                                                                  <http://webprotege.stanford.edu/R8LLXpexnRfBpZHRWqTH30P> ;
+                                                         rdfs:label "Ruminating"@en .
+
+
+#################################################################
+#    Annotations
+#################################################################
+
+<http://webprotege.stanford.edu/R9KzWhr4JhPqDp2fuWRObK1> rdfs:label "Parity"@en .
+
+
+###  Generated by the OWL API (version 4.5.13) https://github.com/owlcs/owlapi
